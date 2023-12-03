@@ -1,0 +1,186 @@
+<html>
+
+<head>
+	<title>Hodgkin-Huxley</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="description" content="Hodgkin-Huxley Neuron Model Playground">
+	<meta name="keywords" content="Hodgkin-Huxley, neuron, model, integrator, engineering">
+	<meta name="author" content="Abhishek Shenoy">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link href="./assets/css/styles.css" rel="stylesheet" type="text/css">
+	</link>
+	<link href="./assets/css/draggable.css" rel="stylesheet" type="text/css">
+	</link>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+		integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+</head>
+
+<body>
+	<!-- <div id="parameters">
+			<input type="number" id="C_m" value="0" step="10" min="100" max="200" placeholder="C_m (uF/cm^2)"></input>
+		</div> -->
+
+	<div id="controls">
+		<div class="inline-div" style="width: 250px;">
+			<p>Sodium Conductance (g_Na)</p>
+			<input type="number" id="gNaInput" value="120.0" step="10">
+		</div>
+		<div class="inline-div" style="width: 250px;">
+			<p>Potassium Conductance (g_K)</p>
+			<input type="number" id="gKInput" value="36.0" step="2">
+		</div>
+		<div class="inline-div" style="width: 250px;">
+			<p>Leak Conductance (g_L)</p>
+			<input type="number" id="gLInput" value="0.3" step="0.1">
+		</div>
+		<div class="inline-div" style="width: 250px;">
+			<p>Sodium potenital(E_Na)</p>
+			<input type="number" id="ENaInput" value="50" step="1.0">
+		</div>
+		<div class="inline-div" style="width: 250px;">
+			<p>Potassium Potential (E_K)</p>
+			<input type="number" id="EKInput" value="-77" step="1.0">
+		</div>
+		<div class="inline-div" style="width: 250px;">
+			<p>Leak Potential (E_L)</p>
+			<input type="number" id="ELInput" value="-54.38" step="0.1">
+		</div>
+
+		<div class="inline-div" style="width: 250px;">
+			<p>Interpolation method</p>
+			<select id="methodDropdown">
+				<option value="Linear" selected="selected">Linear</option>
+				<option value="FiniteDifference">Cubic (finite difference)</option>
+				<!-- <option value="Cardinal">Cubic (cardinal)</option> -->
+				<option value="FritschCarlson">Cubic monotonic (Fritsch-Carlson)</option>
+				<option value="FritschButland">Cubic monotonic (Fritsch-Butland)</option>
+				<option value="Steffen">Cubic monotonic (Steffen)</option>
+			</select>
+		</div>
+	</div>
+	<!-- <div id="presets">
+		<div>
+			<input type="checkbox" id="checkbox" name="checkbox" value="value">
+			<label for="checkbox">Presets</label>
+		</div>
+	</div> -->
+
+	<div id="main">
+
+		<h2>Hodgkin-Huxley Model</h2>
+
+		<div id="graph1" class="plot"></div>
+		<div id="graph2" class="plot"></div>
+		<div id="graph3" class="plot"></div>
+		<div id="graph4" class="plot"></div>
+		<div id="graph5" class="plot"></div>
+
+		<div>
+
+			<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+				integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+
+			<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+			<script async defer
+				src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+			<script async defer
+				src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js"></script>
+			<script async type="text/javascript"
+				src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG"></script>
+
+			<script src="./assets/js/draggable.js"></script>
+			<script src="./assets/js/interpolator.js"></script>
+			<script src="./assets/js/odex.js"></script>
+			<script src="./assets/js/app.js"></script>
+			<!-- <script src="./assets/js/simulate.js"></script> -->
+			
+		<script>
+			document.addEventListener('DOMContentLoaded', function() {
+                // Get a reference to the input field
+				var C_mInput = document.getElementById("controls");
+                var g_NaInput = document.getElementById("gNaInput");
+				var g_KInput = document.getElementById("gKInput");
+				var g_LInput = document.getElementById("gLInput");
+				var E_NaInput = document.getElementById("ENaInput");
+				var E_KInput = document.getElementById("EKInput");
+				var E_LInput = document.getElementById("ELInput");
+
+				// console.log(C_mInput);
+                // Add an event listener to the input field
+                // C_mInput.addEventListener("input", function() {
+                //     console.log(C_mInput.value);
+                //     LogHere(C_mInput.value);
+				// 	// updateFigure();
+                // });
+
+				g_NaInput.addEventListener("input", function() {
+					loggNa(g_NaInput.value);
+					
+				});
+
+				g_KInput.addEventListener("input", function() {
+					LoggK(g_KInput.value);
+				});
+				
+				g_LInput.addEventListener("input", function() {
+					LoggL(g_LInput.value);
+				});
+
+				E_NaInput.addEventListener("input", function() {
+					LogENa(E_NaInput.value);
+				});
+
+				E_KInput.addEventListener("input", function() {
+					LogEK(E_KInput.value);
+				});
+
+				E_LInput.addEventListener("input", function() {
+					LogEL(E_LInput.value);
+				});
+
+				
+            });
+
+			// const cb = document.querySelector('checkbox');
+        	// cb.addEventListener('change', function() {
+			// 	if (this.checked) {
+			// 		console.log('Checkbox is checked..');
+			// 	} else {
+			// 		console.log('Checkbox is not checked..');
+			// 	}
+			// });
+		</script>
+
+			<!-- <script>
+				document.addEventListener('DOMContentLoaded', function () {
+					// Get a reference to the input field
+					var g_NaInput = document.getElementById("gNaInput");
+					var g_KInput = document.getElementById("gKInput");
+					var g_LInput = document.getElementById("gLInput");
+					var E_NaInput = document.getElementById("ENaInput");
+					var E_KInput = document.getElementById("EKInput");
+					var E_LInput = document.getElementById("ELInput");
+					parameters = {}
+					parameters["g_Na"] = g_NaInput.value;
+					parameters["g_K"] = g_KInput.value;
+					parameters["g_L"] = g_LInput.value;
+					parameters["E_Na"] = E_NaInput.value;
+					parameters["E_K"] = E_KInput.value;
+					parameters["E_L"] = E_LInput.value;
+
+
+
+					// Add an event listener to the input field
+					controls.addEventListener("input", function () {
+						console.log("GOING IN");
+						LogHere(parameters);
+						// updateFigure();
+					});
+				});
+			</script> -->
+</body>
+
+</html>
